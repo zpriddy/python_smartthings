@@ -69,6 +69,59 @@ class SmartThings(object):
 
 		return self.deviceds
 
+	def command_switch(self, device_id, command):
+		if(command == "t"):
+			currentState = self.request_devices("switch", device_id)['switch']
+			if(currentState == 'on'):
+				command = 'off'
+			else:
+				command = 'on'
+
+		devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "switch" )
+		devices_paramd = {
+			"deviceId":device_id,
+			"command":command
+		}
+		devices_headerd = {
+			"Authorization": "Bearer %s" % self.std["access_token"],
+		}
+		devices_response = requests.post(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
+		self.deviceds = devices_response.json()
+
+		return self.deviceds
+
+	def command_dimmer(self, device_id, command):
+		if(command == "t"):
+			self.deviceds = self.command_switch(device_id,"t")
+		else:
+			devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "dimmer" )
+			devices_paramd = {
+				"deviceId":device_id,
+				"command": "setLevel"
+
+			}
+			devices_headerd = {
+				"Authorization": "Bearer %s" % self.std["access_token"],
+			}
+			devices_response = requests.post(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
+
+			devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "dimmerLevel" )
+			devices_paramd = {
+				"deviceId":device_id,
+				"command": command
+
+			}
+			devices_headerd = {
+				"Authorization": "Bearer %s" % self.std["access_token"],
+			}
+			devices_response = requests.post(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
+
+			self.deviceds = devices_response.json()
+
+		return self.deviceds
+		
+
+
 	def command_mode(self, mode_id):
 		devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "mode" )
 		devices_paramd = {
@@ -86,18 +139,59 @@ class SmartThings(object):
 
 	def get_mode(self):
 		devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "mode" )
-		devices_paramd = 
-		{
+		devices_paramd = {
 
 		}
-		devices_headerd = 
-		{
+		devices_headerd = {
 			"Authorization": "Bearer %s" % self.std["access_token"],
 		}
 
 		devices_response = requests.get(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
 		self.deviceds = devices_response.json()
 		return self.deviceds
+
+
+	def get_weather(self):
+		devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "weather" )
+		devices_paramd = {
+			
+		}
+		devices_headerd = {
+			"Authorization": "Bearer %s" % self.std["access_token"],
+		}
+
+		devices_response = requests.get(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
+		self.weather = devices_response.json()
+
+		weatherInfo = {}
+		weatherInfo['location'] = self.weather['current_observation']['display_location']['full']
+		weatherInfo['sky'] = self.weather['current_observation']['weather']
+		weatherInfo['wind'] = self.weather['current_observation']['wind_mph']
+		weatherInfo['temperature'] = self.weather['current_observation']['temp_f']
+		weatherInfo['humidity'] = self.weather['current_observation']['relative_humidity']
+
+		devices_url = "https://graph.api.smartthings.com%s/%s" % ( self.endpointd["url"], "weather" )
+		devices_paramd = {
+			'feature': 'forecast'
+			
+		}
+		devices_headerd = {
+			"Authorization": "Bearer %s" % self.std["access_token"],
+		}
+
+		devices_response = requests.get(url=devices_url, params=devices_paramd, headers=devices_headerd, json=devices_paramd)
+		self.weather = devices_response.json()
+
+		weatherInfo['low'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["low"]["fahrenheit"]
+		weatherInfo['high'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["high"]["fahrenheit"]
+		weatherInfo['icon'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["icon"]
+		weatherInfo['precip'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][0]["pop"]
+		weatherInfo['tomorrow_temp_low'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["low"]["fahrenheit"]
+		weatherInfo['tomorrow_temp_high'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["high"]["fahrenheit"]
+		weatherInfo['tomorrow_sky'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["icon"]
+		weatherInfo['tomorrow_precip'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["pop"]
+
+		return weatherInfo
 
 #	def device_request(self, deviced, requestd):
 #		"""Send a request the named device"""
