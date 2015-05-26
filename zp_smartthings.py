@@ -193,6 +193,21 @@ class SmartThings(object):
 
 		return weatherInfo
 
+	def getAllDevices(self):
+		allDevices = {}
+		allDevices["switch"] = self.request_devices("switch")
+		allDevices["contact"] = self.request_devices("contact")
+		allDevices["lock"] = self.request_devices("lock")
+		allDevices["mode"] = self.request_devices("mode")
+		allDevices["power"] = self.request_devices("power")
+		allDevices["presence"] = self.request_devices("presence")
+		allDevices["dimmer"] = self.request_devices("dimmer")
+		allDevices["temperature"] = self.request_devices("temperature")
+		allDevices["humidity"] = self.request_devices("humidity")
+		allDevices["weather"] = self.request_devices("weather")
+
+		return allDevices
+
 #	def device_request(self, deviced, requestd):
 #		"""Send a request the named device"""
 #
@@ -231,16 +246,19 @@ def printAllDevices(allDevices):
 		deviceKeys = allDevices[device].keys()
 		print "Device Type: ", device
 		for k in deviceKeys:
-			print "\t", k, 
-			if device in devicesWithState:
-				print " - ", allDevices[device][k]['state'],
-			if device in devicesWithValue:
-				print " - ", allDevices[device][k]['value'],
-			if device in devicesWithEnergy:
-				print " - ", allDevices[device][k]['energy'],
-			if device in devicesWithLevel:
-				print " - ", allDevices[device][k]['level'],
-			if device == "mode":
-				print  " - ", allDevices[device][k],
+			if (device != "deviceType" and device != "weather" ):
+				print "\t", k, 
+				if device in devicesWithState:
+					print " - ", allDevices[device][k]['state'],
+				if device in devicesWithValue:
+					print " - ", allDevices[device][k]['value'],
+				if device in devicesWithEnergy:
+					print " - ", allDevices[device][k]['energy'],
+				if device in devicesWithLevel:
+					print " - ", allDevices[device][k]['level'], 
+				if device == "mode":
+					print  " - ", allDevices[device][k]['mode'],
+				
+				print " - ", allDevices[device][k]['deviceType'],
 			print ""
 
