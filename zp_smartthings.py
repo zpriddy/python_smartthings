@@ -1,7 +1,50 @@
+#! /usr/bin/python
+#################################################
+#			SmartThings Python API				#
+#################################################
+# Zachary Priddy - 2015 						#
+# me@zpriddy.com 								#
+#												#
+# Features: 									#
+#	- Read and Write capabilities with 			#
+#		SmartThings	using RESTapi				#
+#################################################
+#################################################
+
+
+#################################################
+# TO DO:
+# -Add Thermostat Control
+# -Add HUE Intagration
+
+
+
 import sys
 import requests
 import pprint
 import json
+
+icons = {
+	'chanceflurries': '&#xe036',
+	'chancerain': '&#xe009',
+	'chancesleet': '&#xe003',
+	'chancesnow': '&#xe036',
+	'chancetstorms': '&#xe025',
+	'clear': '&#xe028',
+	'cloudy': '&#xe000',
+	'flurries': '&#xe036',
+	'fog': '&#xe01b',
+	'hazy': '&#xe01b',
+	'mostlycloudy': '&#xe001',
+	'mostlysunny': '&#xe001',
+	'partlycloudy': '&#xe001',
+	'partlysunny': '&#xe001',
+	'sleet': '&#xe003',
+	'rain': '&#xe009',
+	'snow': '&#xe036',
+	'sunny': '&#xe028',
+	'tstorms': '&#xe025'
+}
 
 class SmartThings(object):
 	def __init__(self, verbose=True):
@@ -184,11 +227,11 @@ class SmartThings(object):
 
 		weatherInfo['low'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["low"]["fahrenheit"]
 		weatherInfo['high'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["high"]["fahrenheit"]
-		weatherInfo['icon'] = self.weather["forecast"]["simpleforecast"]["forecastday"][0]["icon"]
+		weatherInfo['icon'] = icons[self.weather["forecast"]["simpleforecast"]["forecastday"][0]["icon"]]
 		weatherInfo['precip'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][0]["pop"]
 		weatherInfo['tomorrow_temp_low'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["low"]["fahrenheit"]
 		weatherInfo['tomorrow_temp_high'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["high"]["fahrenheit"]
-		weatherInfo['tomorrow_sky'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["icon"]
+		weatherInfo['tomorrow_icon'] =  icons[self.weather["forecast"]["simpleforecast"]["forecastday"][1]["icon"]]
 		weatherInfo['tomorrow_precip'] =  self.weather["forecast"]["simpleforecast"]["forecastday"][1]["pop"]
 
 		return weatherInfo
@@ -208,32 +251,30 @@ class SmartThings(object):
 
 		return allDevices
 
-#	def device_request(self, deviced, requestd):
-#		"""Send a request the named device"""
-#
-#		command_url = deviced['url']
-#		command_paramd = {
-#			"access_token": self.std["access_token"]
-#		}
-#		command_headerd = {}
+	def updateSwitch(self):
+		switches = {}
+		switches = self.request_devices("switch")
 
-		
+		return switches
 
+	def updateMode(self):
+		mode = {}
+		mode = self.request_devices("mode")
 
-def getAllDevices(SmartThings):
-	allDevices = {}
-	allDevices["switch"] = SmartThings.request_devices("switch")
-	allDevices["contact"] = SmartThings.request_devices("contact")
-	allDevices["lock"] = SmartThings.request_devices("lock")
-	allDevices["mode"] = SmartThings.request_devices("mode")
-	allDevices["power"] = SmartThings.request_devices("power")
-	allDevices["presence"] = SmartThings.request_devices("presence")
-	allDevices["dimmer"] = SmartThings.request_devices("dimmer")
-	allDevices["temperature"] = SmartThings.request_devices("temperature")
-	allDevices["humidity"] = SmartThings.request_devices("humidity")
-	allDevices["weather"] = SmartThings.request_devices("weather")
+		return mode
 
-	return allDevices
+	def updateDimmer(self):
+		dimmer = {}
+		dimmer = self.request_devices("dimmer")
+
+		return dimmer
+
+	def updateWeather(self):
+		weather = {}
+		weather = self.request_devices("weather")
+
+		return weather
+
 
 
 def printAllDevices(allDevices):
@@ -258,7 +299,6 @@ def printAllDevices(allDevices):
 					print " - ", allDevices[device][k]['level'], 
 				if device == "mode":
 					print  " - ", allDevices[device][k]['mode'],
-				
 				print " - ", allDevices[device][k]['deviceType'],
 			print ""
 
